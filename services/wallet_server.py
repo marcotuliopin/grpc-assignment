@@ -74,19 +74,26 @@ class WalletServicer(wallet_pb2_grpc.WalletServiceServicer):
 
 def create_servicer():
     stop_ev = Event()
+    # Inicializa o serviço de carteira
     servicer = WalletServicer(stop_ev)
     for line in stdin:
-        owner_key, balance = line.strip().split()
+        line = line.strip()
+        if not line: continue # Ignora linhas em branco
+        # Divide a linha em chave do proprietário e saldo
+        owner_key, balance = line.split()
         servicer.wallets[owner_key] = int(balance)
     return servicer, stop_ev
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    # Configura o serviço e obtém o evento de parada
     servicer, stop_ev = create_servicer()
-    wallet_pb2_grpc.add_WalletServiceServicer_to_server(servicer, server) # TODO
+    wallet_pb2_grpc.add_WalletServiceServicer_to_server(servicer, server)
     server.add_insecure_port(f'0.0.0.0:{argv[1]}')
+    # Inicia o servidor
     server.start()
     stop_ev.wait()
+    # Finaliza a execução
     server.stop(grace=None)
 
 if __name__ == '__main__':

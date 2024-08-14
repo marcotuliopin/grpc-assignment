@@ -43,7 +43,7 @@ def run():
         # O servidor foi interrompido
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                break
+                print('-9') # Imprime -9, o que corresponde ao retorno exigido pelo enunciado quando há falha de comunicação com o servidor de carteiras
 
 if __name__ == '__main__':
     run()
