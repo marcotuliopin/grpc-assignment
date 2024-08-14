@@ -1,21 +1,30 @@
-.PHONY: clean stubs run_serv_banco run_cli_banco run_serv_loja run_cli_loja
+.PHONY: clean stubs run_serv_banco run_cli_banco run_serv_loja run_cli_loja banco_stub loja_stub
+
+all: clean stubs
 
 clean:
-	rm -f services/wallet/*_pb2.py services/wallet/*_pb2_grpc.py services/wallet/__pycache__
-	rm -f services/store/*_pb2.py services/store/*_pb2_grpc.py services/store/__pycache__
+	rm -rf services/*_pb2.py services/*_pb2_grpc.py services/__pycache__
 
-stubs:
-	python -m grpc_tools.protoc -I./services/wallet --python_out=./services/wallet --grpc_python_out=./services/wallet ./services/wallet/wallet.proto
-	python -m grpc_tools.protoc -I./services/store --python_out=./services/store --grpc_python_out=./services/store ./services/store/store.proto
+stubs: banco_stub loja_stub
 
-run_serv_banco:
-	python3 ./services/wallet/svc_banco.py $(arg1)
+loja_stub: services/store_pb2.py services/store_pb2_grpc.py
 
-run_cli_banco:
-	python3 ./services/wallet/cln_banco.py $(arg1) $(arg2)
+services/store_pb2.py services/store_pb2_grpc.py: services/store.proto
+	python3 -m grpc_tools.protoc -I./services/ --python_out=./services/ --grpc_python_out=./services ./services/store.proto
 
-run_serv_loja:
-	python3 ./services/store/svc_loja.py $(arg1) $(arg2) $(arg3) $(arg4)
+banco_stub: services/wallet_pb2.py services/wallet_pb2_grpc.py
 
-run_cli_loja:
-	python3 ./services/store/cln_loja.py $(arg1) $(arg2) $(arg3)
+services/wallet_pb2.py services/wallet_pb2_grpc.py: services/wallet.proto
+	python3 -m grpc_tools.protoc -I./services/ --python_out=./services/ --grpc_python_out=./services ./services/wallet.proto
+
+run_serv_banco: stubs
+	python3 services/wallet_server.py $(arg1)
+
+run_cli_banco: stubs
+	python3 services/wallet_client.py $(arg1) $(arg2)
+
+run_serv_loja: stubs
+	python3 services/store_server.py $(arg1) $(arg2) $(arg3) $(arg4)
+
+run_cli_loja: stubs
+	python3 services/store_client.py $(arg1) $(arg2) $(arg3)

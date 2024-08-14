@@ -2,7 +2,7 @@ import grpc
 from concurrent import futures
 from threading import Event
 from typing import Dict, Tuple
-from sys import stdin
+from sys import stdin, argv
 import wallet_pb2
 import wallet_pb2_grpc
 
@@ -31,8 +31,8 @@ class WalletServicer(wallet_pb2_grpc.WalletServiceServicer):
         else:
             # Se a carteira existir e tiver fundos suficientes, cria uma nova ordem de retirada
             # Gera um novo ID para a ordem
-            order_count += 1
-            response = order_count
+            self.order_count += 1
+            response = self.order_count
             # Remove os fundos da carteira
             self.wallets[request.owner_key] -= request.amount
             # Adiciona a nova ordem ao dicionário de ordens
@@ -65,6 +65,7 @@ class WalletServicer(wallet_pb2_grpc.WalletServiceServicer):
         return wallet_pb2.TransferResponse(response=response)
 
     def EndExecution(self, request, context):
+        # Escrever na saída padrão os valores atualizados das carteiras existentes
         for key, value in self.wallets.items():
             print(key, value)
         self._stop.set()
@@ -83,10 +84,10 @@ def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     servicer, stop_ev = create_servicer()
     wallet_pb2_grpc.add_WalletServiceServicer_to_server(servicer, server) # TODO
-    server.add_insecure_port('0.0.0.0:50051') # TODO
+    server.add_insecure_port(f'0.0.0.0:{argv[1]}')
     server.start()
     stop_ev.wait()
-    server.stop()
+    server.stop(grace=None)
 
 if __name__ == '__main__':
     serve()
