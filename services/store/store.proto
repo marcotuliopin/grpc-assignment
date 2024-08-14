@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package store;
+
+service StoreService {
+    rpc GetPrice (GetPriceRequest) returns (GetPriceResponse) {}
+    rpc Sell (SellRequest) returns (SellResponse) {}
+    rpc EndExecution (EndExecutionRequest) returns (EndExecutionResponse) {}
+}
+
+message GetPriceRequest {}
+
+message GetPriceResponse {
+    int32 price = 1;
+}
+
+message SellRequest {
+    int32 order_id = 1;
+}
+
+message SellResponse {
+    int32 response = 1;
+}
+
+message EndExecutionRequest {}
+
+message EndExecutionResponse {
+    int32 seller_balance = 1;
+    int32 pending_orders = 2;
+}

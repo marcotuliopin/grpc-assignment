@@ -1,0 +1,43 @@
+syntax = 'proto3';
+
+package wallet;
+
+service WalletService {
+    rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse) {}
+    rpc Withdraw (WithdrawRequest) returns (WithdrawResponse) {}
+    rpc Transfer (TransferRequest) returns (TransferResponse) {}
+    rpc EndExecution  (EndExecutionRequest) returns (EndExecutionResponse) {}
+}
+
+message GetBalanceRequest {
+    string owner_key = 1;
+}
+
+message GetBalanceResponse {
+    int32 balance = 1;
+}
+
+message WithdrawRequest {
+    string owner_key = 1;
+    int32 amount = 2;
+}
+
+message WithdrawResponse {
+    int32 response = 1;
+}
+
+message TransferRequest {
+    int32 order_id = 1;
+    int32 check = 2;
+    string owner_key = 3;
+}
+
+message TransferResponse {
+    int32 response = 1;
+}
+
+message EndExecutionRequest {}
+
+message EndExecutionResponse {
+    int32 pending_orders = 2;
+}
